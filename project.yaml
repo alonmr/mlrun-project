@@ -1,0 +1,44 @@
+kind: project
+metadata:
+  name: new-git-project
+spec:
+  functions:
+  - url: fetch_data.py
+    name: fetch_data
+    kind: job
+    image: mlrun/mlrun
+    handler: fetch_data
+  - url: trainer.py
+    name: trainer
+    kind: job
+    image: mlrun/mlrun
+    handler: train
+  - url: serving.yaml
+    name: serving
+    kind: serving
+  workflows:
+  - path: ./workflow.py
+    name: main
+  artifacts:
+  - kind: dataset
+    metadata:
+      project: new-git-project
+      key: data
+    spec:
+      target_path: https://s3.wasabisys.com/iguazio/data/iris/iris.data.raw.csv
+      format: ''
+    status:
+      state: created
+  - kind: model
+    metadata:
+      project: new-git-project
+      key: model
+    spec:
+      target_path: s3://mlrun/projects/new-git-proj/artifacts/trainer-train/0/model/
+      model_file: iris_model.pkl
+    status:
+      state: created
+  conda: ''
+  source: git://github.com/alonmr/mlrun-project.git#refs/heads/master
+  origin_url: git://github.com/alonmr/mlrun-project.git#master
+  desired_state: online
